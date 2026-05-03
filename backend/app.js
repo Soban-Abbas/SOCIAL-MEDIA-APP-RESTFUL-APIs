@@ -1,17 +1,19 @@
 const express = require("express");
-const postsRoutes=require("./routes/post")
+const mongoose = require("mongoose");
+require('dotenv').config()
+const postsRoutes = require("./routes/post")
 const app = express();
 app.use(express.json());
 
-
-app.use((req,res,next)=>{
+//handling cross origin req seting header methods and headers which we accept with req , hanlding optional method 
+app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,PUT,DELETE,OPTIONS")
     res.setHeader("Access-Control-Allow-Headers", "*")
 
-
-    if(req.method==='OPTIONS'){
-        return res.sendStatus(204);
+    //send auto by browser 
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);//only sending success signal
     }
     next();
 })
@@ -19,4 +21,40 @@ app.use((req,res,next)=>{
 app.use(postsRoutes);
 
 
-app.listen(8080);
+
+
+
+
+
+//global error handling middlewere
+app.use((err, req, res, next) => {
+    console.log(err.stack)
+
+    res.status(500).json({
+        success: false,
+        message: err.message || "Internal server error"
+    })
+})
+
+// db connection link
+const MonogoDbClustorUrl = `mongodb+srv://${process.env.userName}:${process.env.password}@cluster0.jvimlwf.mongodb.net/${process.env.databaseName}?retryWrites=true&w=majority`;
+
+
+//Db Conection function 
+async function main() {
+    try {
+
+
+        const connected = await mongoose.connect(MonogoDbClustorUrl);
+        app.listen(8080);
+        console.log("connected to Db and server Started ")
+
+
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+//calling db connection function
+main()
+
