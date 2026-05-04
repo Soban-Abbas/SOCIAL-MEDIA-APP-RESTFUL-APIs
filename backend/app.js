@@ -3,7 +3,12 @@ const mongoose = require("mongoose");
 require('dotenv').config()
 const postsRoutes = require("./routes/post")
 const app = express();
+const {root}=require('./util/rootpath')
+const path=require("path")
 app.use(express.json());
+console.log(root)
+
+app.use(express.static(`${root}/public`));
 
 //handling cross origin req seting header methods and headers which we accept with req , hanlding optional method 
 app.use((req, res, next) => {
@@ -19,6 +24,9 @@ app.use((req, res, next) => {
 })
 
 app.use(postsRoutes);
+
+
+
 
 
 
