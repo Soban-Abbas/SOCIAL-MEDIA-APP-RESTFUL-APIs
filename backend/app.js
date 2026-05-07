@@ -5,11 +5,12 @@ const postsRoutes = require("./routes/post")
 const app = express();
 const {root}=require('./util/rootpath')
 const path=require("path")
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 console.log(root)
 
 app.use(express.static(`${root}/public`));
-
+app.use('/images',express.static(`${root}/images`));
 //handling cross origin req seting header methods and headers which we accept with req , hanlding optional method 
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*")
@@ -36,9 +37,11 @@ app.use(postsRoutes);
 
 //global error handling middlewere
 app.use((err, req, res, next) => {
+    const status=error.status || 500;
+    const message=error.message;
     console.log(err.stack)
 
-    res.status(500).json({
+    res.status(status).json({
         success: false,
         message: err.message || "Internal server error"
     })
