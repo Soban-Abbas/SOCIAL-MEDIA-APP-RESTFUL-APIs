@@ -2,21 +2,26 @@ const { validationResult }=require("express-validator")
 const postModel=require("../models/postModel")
 
 
-exports.getPosts=(req,res,next)=>{
-    res.status(200).json({
-        posts:[
-            {
-                _id:1,
-                title:"My Car",
-                imageUrl:'http://localhost:8080/images/car.jpg',
-                createdAt:Date.now(),
-                creator:{
-                    name:"Soban"
-                }
-        }
-    ],
-        totalItems:0,
-    })
+exports.getPosts=async(req,res,next)=>{
+try {
+    
+const posts= await postModel.find();
+
+if(!posts){
+    const error=new Error("Products Not found");
+    error.status=404
+    throw error;
+}
+
+res.status(200).json({
+    posts:posts,
+    message:"Posts Find Successfully"
+})
+
+} catch (error) {
+next(error)
+    
+}
 }
 
 exports.createPosts=async(req,res,next)=>{
@@ -33,6 +38,7 @@ console.log(req.body)
         const post = new postModel({
             title: req.body.title,
             content: req.body.content,
+            image: '/images/7seater.jpg',
             creator: {
                 name: "Soban"
             }
@@ -71,4 +77,32 @@ exports.updateStatus=(req,res,next)=>{
     res.status(200).json({
         status: "Offline"
     })
+}
+
+
+exports.getSinglePost=async(req,res,next)=>{
+try {
+    
+    const postId = req.params.postId;
+    const singlePost = await postModel.findOne({ _id: postId });
+    if(!singlePost){
+        const error=new Error("Product not found")
+        error.status=404
+        throw error
+    }
+
+    res.status(200).json({
+        post:singlePost,
+        message:"Post Successfully found"
+    })
+
+
+} catch (error) {
+    next(error)
+    
+}
+
+   
+
+
 }

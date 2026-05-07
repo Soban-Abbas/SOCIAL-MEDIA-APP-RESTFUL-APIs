@@ -11,6 +11,7 @@ router.post('/posts',
 
 
     ,postsContollers.createPosts);
+router.get("/singlepost/:postId", postsContollers.getSinglePost);    
 router.get('/status',postsContollers.getStatus);
 router.patch('/status',postsContollers.updateStatus)
 module.exports=router
