@@ -1,11 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 require('dotenv').config()
+const path =require("path")
+const multer=require("multer")
 const postsRoutes = require("./routes/post")
 const app = express();
 const {root}=require('./util/rootpath')
-const path=require("path")
 app.use(express.urlencoded({ extended: true }));
+
+
+
+
+
+
+
+
+
 app.use(express.json());
 console.log(root)
 
@@ -37,8 +47,16 @@ app.use(postsRoutes);
 
 //global error handling middlewere
 app.use((err, req, res, next) => {
-    const status=error.status || 500;
-    const message=error.message;
+
+if(err instanceof multer.MulterError){
+    return res.status(400).json({
+        message:err.message
+    })
+}
+
+
+    const status=err.status || 500;
+    const message=err.message;
     console.log(err.stack)
 
     res.status(status).json({
