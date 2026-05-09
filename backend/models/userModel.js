@@ -15,12 +15,13 @@ const userSchema = new mongoose.Schema({
     },
     status:{
         type: String,
-        required:true
+        default:"i am new User"
+      //  required:true
     },
   posts:[{
     type:schema.Types.ObjectId,
     ref: 'post',
-    required:true
+   // required:true
   }]
 },{timestamps:true});
 
