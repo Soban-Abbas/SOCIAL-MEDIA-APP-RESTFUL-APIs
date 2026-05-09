@@ -30,7 +30,7 @@ exports.createPosts = async (req, res, next) => {
 
 
     if (!req.file) {
-        const error = new Error("Upload File");
+        const error = new Error("Please select file to upload");
         error.status = 422
         throw error
     }
@@ -155,9 +155,44 @@ exports.updatePost = async (req, res, next) => {
 
 
 
+
     } catch (error) {
         console.log(error)
     }
+
+
+}
+
+exports.deletePost=async(req,res,next)=>{
+try {
+
+let post=await postModel.findById({_id:req.params.postId});
+
+
+
+let deleteImagePath=path.join(root,path.normalize(post.image));
+
+
+await fs.unlink(deleteImagePath);
+
+
+
+    let deletepost = await postModel.deleteOne({ _id: req.params.postId })
+    if(deletepost.deleteCount===0){
+        const error=new Error("Post not found ")
+        error.status=404
+        next(error);
+    }
+    else{
+        res.status(200).json({
+            message:"Post deleted Successfully"
+        })
+    }
+} catch (error) {
+    next(error)
+}
+    
+
 
 
 }

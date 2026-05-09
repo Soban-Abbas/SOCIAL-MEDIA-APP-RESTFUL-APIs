@@ -23,4 +23,6 @@ router.put('/updatePost/:postId', uploadSingleFile,
 router.get("/singlepost/:postId", postsContollers.getSinglePost);
 router.get('/status', postsContollers.getStatus);
 router.patch('/status',postsContollers.updateStatus)
+router.delete("/post/:postId" , postsContollers.deletePost)
+
 module.exports = router
