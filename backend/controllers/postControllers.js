@@ -7,7 +7,19 @@ const postModel = require("../models/postModel")
 exports.getPosts = async (req, res, next) => {
     try {
 
-        const posts = await postModel.find();
+const page=parseInt(req.query.page) || 1;
+const limit=parseInt(req.query.limit) || 10;
+
+const startIndex=(page-1)*limit;
+
+const total=await postModel.countDocuments();
+
+
+
+
+
+
+        const posts = await postModel.find().skip(startIndex).limit(limit);
 
         if (!posts) {
             const error = new Error("Products Not found");
@@ -17,7 +29,10 @@ exports.getPosts = async (req, res, next) => {
 
         res.status(200).json({
             posts: posts,
-            message: "Posts Find Successfully"
+            message: "Posts Find Successfully",
+            total,
+            limit,
+            page
         })
 
     } catch (error) {
