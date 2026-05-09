@@ -1,6 +1,4 @@
 const mongoose=require("mongoose");
-const { required } = require("../../frontend/src/util/validators");
-
 
 const postSchema = new mongoose.Schema({
     title: {
