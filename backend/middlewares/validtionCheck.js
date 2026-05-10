@@ -12,7 +12,7 @@ exports.validationCheck = (req, res, next) => {
         }
         let error = new Error(" fields Validation Error")
         error.status = 422
-    throw error
+    next(error)
     }
     else {
         next()

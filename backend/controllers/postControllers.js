@@ -8,12 +8,12 @@ const userModel = require("../models/userModel")
 exports.getPosts = async (req, res, next) => {
     try {
 
-const page=parseInt(req.query.page) || 1;
-const limit=parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
 
-const startIndex=(page-1)*limit;
+        const startIndex = (page - 1) * limit;
 
-const total=await postModel.countDocuments();
+        const total = await postModel.countDocuments();
 
 
 
@@ -51,7 +51,7 @@ exports.createPosts = async (req, res, next) => {
         throw error
     }
 
-    
+
 
     try {
 
@@ -60,25 +60,25 @@ exports.createPosts = async (req, res, next) => {
             content: req.body.content,
 
             image: req.file.path.replace('\\', '/'),
-       
+
             creator: req.user.userId
-        
+
         })
 
         const savedPost = await post.save();
         if (savedPost) {
             console.log("Post Saved Successfully")
 
-            let user = await userModel.findById({_id:req.user.userId});
+            let user = await userModel.findById({ _id: req.user.userId });
             user.posts.push(savedPost);
             await user.save();
 
 
             return res.status(201).json({
-                creator:{
-                    name:user.user,
-                    id:user._id,
-                    email:user.email
+                creator: {
+                    name: user.user,
+                    id: user._id,
+                    email: user.email
                 },
                 post: savedPost,
                 message: "Post Saved Successfully"
@@ -144,14 +144,21 @@ exports.updatePost = async (req, res, next) => {
     console.log(req.params.postId)
 
     try {
-        const post = await postModel.findOne({ _id: req.params.postId });
+        const post = await postModel.findById({ _id: req.params.postId });
+        console.log(post);
+        if (post.creator.toString() !== req.user.userId.toString()) {
+            const error = new Error("Unauthrized to update that post");
+            error.status = 403;
+            next(error);
+        }
         if (req.file) {
             let oldFilePath = post.image
-            let updatedPath = oldFilePath.replace('/', '\\')
+    
 
-            let completePath = path.join(root, updatedPath);
+            let completePath = path.join(root, oldFilePath
+            );
 
-           await  fs.unlink(completePath)
+            await fs.unlink(completePath)
 
             post.title = req.body.title || post.title;
             post.content = req.body.content || post.content
@@ -159,14 +166,14 @@ exports.updatePost = async (req, res, next) => {
 
             await post.save()
             res.status(200).json({
-                message:"Post updated successfuly",
+                message: "Post updated successfuly",
                 post
             })
-        }else{
+        } else {
 
             post.title = req.body.title || post.title;
             post.content = req.body.content || post.content
-            
+
 
             await post.save()
 
@@ -191,35 +198,44 @@ exports.updatePost = async (req, res, next) => {
 
 }
 
-exports.deletePost=async(req,res,next)=>{
-try {
+exports.deletePost = async (req, res, next) => {
+    try {
 
-let post=await postModel.findById({_id:req.params.postId});
+        let post = await postModel.findById({ _id: req.params.postId });
+
+        if (post.creator.toString() !== req.user.userId.toString()) {
+            const error = new Error("Unauthrized to delete that post");
+            error.status = 403;
+            next(error);
+        }
+
+        let deleteImagePath = path.join(root, path.normalize(post.image));
+
+
+        await fs.unlink(deleteImagePath);
 
 
 
-let deleteImagePath=path.join(root,path.normalize(post.image));
-
-
-await fs.unlink(deleteImagePath);
-
-
-
-    let deletepost = await postModel.deleteOne({ _id: req.params.postId })
-    if(deletepost.deleteCount===0){
-        const error=new Error("Post not found ")
-        error.status=404
-        next(error);
+        let deletepost = await postModel.deleteOne({ _id: req.params.postId })
+        if (deletepost.deleteCount === 0) {
+            const error = new Error("Post not found ")
+            error.status = 404
+            next(error);
+        }
+        else {
+            await userModel.findByIdAndUpdate(req.user.userId, {
+                $pull: {
+                    posts: req.params.postId
+                }
+            })
+            res.status(200).json({
+                message: "Post deleted Successfully"
+            })
+        }
+    } catch (error) {
+        next(error)
     }
-    else{
-        res.status(200).json({
-            message:"Post deleted Successfully"
-        })
-    }
-} catch (error) {
-    next(error)
-}
-    
+
 
 
 

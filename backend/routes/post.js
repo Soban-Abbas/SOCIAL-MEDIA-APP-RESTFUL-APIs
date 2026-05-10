@@ -9,7 +9,7 @@ const router = express.Router();
 const postsContollers = require("../controllers/postControllers")
 
 
-router.get('/posts', validateToken,postsContollers.getPosts)
+router.get('/posts',validateToken,postsContollers.getPosts)
 router.post('/posts', validateToken,uploadSingleFile,
 
     check('title').notEmpty().trim().isLength({ min: 5 }).withMessage("title must be at least 5 characters"),
