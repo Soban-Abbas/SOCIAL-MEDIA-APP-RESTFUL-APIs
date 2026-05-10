@@ -2,6 +2,7 @@ const fs = require("fs/promises")
 const path = require("path")
 const { root } = require("../util/rootpath")
 const postModel = require("../models/postModel")
+const userModel = require("../models/userModel")
 
 
 exports.getPosts = async (req, res, next) => {
@@ -50,23 +51,35 @@ exports.createPosts = async (req, res, next) => {
         throw error
     }
 
-
+    
 
     try {
 
         const post = new postModel({
             title: req.body.title,
             content: req.body.content,
+
             image: req.file.path.replace('\\', '/'),
-            creator: {
-                name: "Soban"
-            }
+       
+            creator: req.user.userId
+        
         })
 
         const savedPost = await post.save();
         if (savedPost) {
             console.log("Post Saved Successfully")
+
+            let user = await userModel.findById({_id:req.user.userId});
+            user.posts.push(savedPost);
+            await user.save();
+
+
             return res.status(201).json({
+                creator:{
+                    name:user.user,
+                    id:user._id,
+                    email:user.email
+                },
                 post: savedPost,
                 message: "Post Saved Successfully"
             })

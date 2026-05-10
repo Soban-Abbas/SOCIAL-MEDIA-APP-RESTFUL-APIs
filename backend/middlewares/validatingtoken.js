@@ -21,6 +21,7 @@ exports.validateToken=(req,res,next)=>{
     } catch (error) {
         error.status=403;
         error.message="Forbidden: Invalida or Expire Token"
+        next(error)
     }
 
 }

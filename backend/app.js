@@ -39,7 +39,7 @@ app.use(authRoutes);
 
 //global error handling middlewere
 app.use((err, req, res, next) => {
-
+    console.error(err.stack);
 if(err instanceof multer.MulterError){
     return res.status(400).json({
         message:err.message
